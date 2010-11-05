@@ -43,6 +43,6 @@ The following config keys can be defined:
 	// 		Pathname to the theme directory you want to clone/vary
 	//		e.g. '~/dtk/trunk/dijit/themes/claro' 
 	// 		This is optional as you can provide a svnThemeUrl instead
-	'inDir'		: 'http://host/svn/repo/trunk/dijit/themes/themeName',
+	'inDir'		: './dirName',
 
 config.json needs to be valid json i.e. as PHP understands it, not javascript.
