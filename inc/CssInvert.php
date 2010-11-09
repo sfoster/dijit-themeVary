@@ -53,7 +53,7 @@ function invertRgbColor($str) {
 class CssInvert extends CssTransform
 {
 	function transformString($str) {
-		$this->log("transforming...");
+		$this->log("transforming CSS");
 		$pathRe = '/url\(\s*[\'\"]?([^\'\"\)]+))/';
 		$hexRe = '/#([0-9a-f]{3,6})/i';
 		$rgbRe = '/(rgb|rgba)\(([^\(+]+)\)/i';

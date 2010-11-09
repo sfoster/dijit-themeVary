@@ -14,9 +14,12 @@ class ImageTransform
 	}
 	function transformFile($pathname) {
 		$this->path = $pathname;
-		$fh  = fopen($pathname, "r");
+		$this->image = new Image(array(
+			"filename" => $pathname
+		));
+		// $fh  = fopen($pathname, "r");
 		$this->transform($fh);
-		fclose($fh);
+		// fclose($fh);
 	}
 
 	function transform($fh) {

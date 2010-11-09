@@ -173,9 +173,11 @@ class CssTransformApp
 	}
 
 	function transformImageFile($path) {
+		$this->log("transforming img: $path");
 		if($this->dryRun) {
 			$this->log("(dry run) transform image file: $path");
 		} else {
+			$this->log("transforming image file: $path");
 			$result = $this->imgTransform->transformFile($path);
 		}
 	}
