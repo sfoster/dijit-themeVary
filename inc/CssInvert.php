@@ -44,6 +44,10 @@ function invertRgbColorValue($val) {
 }
 function invertRgbColor($str) {
 	$rgba = array_map('trim', explode(',', $str));
+	if(!(isset($rgba[0]) && isset($rgba[1]) && isset($rgba[2]))) {
+		// false match, send it back as is
+		return $str;
+	}
 	$rgba[0] = invertRgbColorValue($rgba[0]);
 	$rgba[1] = invertRgbColorValue($rgba[1]);
 	$rgba[2] = invertRgbColorValue($rgba[2]);
@@ -53,23 +57,23 @@ function invertRgbColor($str) {
 class CssInvert extends CssTransform
 {
 	function transformString($str) {
+		$origstr = $str;
 		$this->log("transforming CSS");
 		$pathRe = '/url\(\s*[\'\"]?([^\'\"\)]+))/';
 		$hexRe = '/#([0-9a-f]{3,6})/i';
 		$rgbRe = '/(rgb|rgba)\(([^\(+]+)\)/i';
 		
-		// preg_replace(
-		// 	"/(<\/?)(\w+)([^>]*>)/e", 
-		//     "'\\1'.strtoupper('\\2').'\\3'", 
-		//              $html_body);		
+		try {
+			$str = preg_replace($hexRe . 'e', 
+				"'#' . invertHexColor('\\1')",
+				$str);
 
-		$str = preg_replace($hexRe . 'e', 
-			"'#' . invertHexColor('\\1')",
-			$str);
-
-		$str = preg_replace($rgbRe . 'e', 
-			"'\\1(' . invertRgbColor('\\2') . ')'",
-			$str);
+			$str = preg_replace($rgbRe . 'e', 
+				"'\\1(' . invertRgbColor('\\2') . ')'",
+				$str);
+		} catch(Exception $e) {
+			throw new Exception("Bad CssInvert transform input: $origstr");
+		}
 		// $this->log("transformed: $str");
 		return $str;
 	}

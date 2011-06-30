@@ -17,13 +17,13 @@ class ImageTransform
 		$this->image = new Image(array(
 			"filename" => $pathname
 		));
-		// $fh  = fopen($pathname, "r");
-		$this->transform($fh);
-		// fclose($fh);
+		$this->transform("invert"); // support other transforms in the future like hue shifting?
 	}
 
-	function transform($fh) {
-		$this->log("(todo: transform: ". $this->path .")");
+	function transform($method) {
+		$img = $this->image;
+		$img->$method();
+		$img->save($this->path);
 	}
 
 	function log($msg) {
