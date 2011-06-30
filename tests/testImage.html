@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Page Title</title>
+	<style>
+		body {
+			background: #000;
+		}
+	</style>
+	<script>
+		window.onload = function(){
+			var colors = ["red", "green", "black", "white", "blue"];
+			var idx = 0;
+			document.addEventListener("click", function(evt){
+				document.body.style.backgroundColor = colors[idx++];
+				if(idx>=colors.length) {
+					idx = 0;
+				}
+			});
+		}
+	</script>
+</head>
+<body>
+	<img src="example.png" style="border: 1px solid yellow"/>
+	<img src="invertedExample.png" style="border: 1px solid yellow"/>
+</body>
+</html>
