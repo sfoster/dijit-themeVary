@@ -12,7 +12,9 @@ class Image
 			}
 		}
 	}
-	
+	function _is_gifanim($filename) {
+		return (bool)preg_match('/\x00\x21\xF9\x04.{4}\x00(\x2C|\x21)/s', file_get_contents($filename), $m);
+	}
 	function _do($name, $args=array()) {
 		$name = "_$name";
 		// print("_do: $name\n");
@@ -27,9 +29,19 @@ class Image
 			case 'image/png' : $image = imagecreatefrompng($infile); break;
 			case 'image/jpeg': $image = imagecreatefromjpeg($infile); break;
 			case 'image/gif' : 
-				$old_id = imagecreatefromgif($infile); 
+				if($this->_is_gifanim($infile)) {
+					// split into frames, treat each seperately and recompose to animation
+					
+				} else {
+					
+				}
+				$old_id = imagecreatefromgif($infile);
 				$image  = imagecreatetruecolor($info[0],$info[1]); 
 				imagecopy($image,$old_id,0,0,0,0,$info[0],$info[1]); 
+				// $transparent_index = imagecolortransparent($image); /* gives the index of current transparent color or -1 */
+				// if($transparent_index!=(-1)) {
+				// 	$transparent_color = imagecolorsForindex($img,$transparent_index);	
+				// }
 				break;
 			default: break;
 		}
@@ -54,25 +66,43 @@ class Image
 			return false;
 		}
 		
-		$imgdest= imagecreatetruecolor($this->width, $this->height);
+		$keepcolor = true;
 		$imgsrc	= $this->image;
 		$height	= $this->height;
 		$width	= $this->width;
-
-		for( $x=0 ; $x<$width ; $x++ )
-		{
-			imagecopy($imgdest, $imgsrc, $width-$x-1, 0, $x, 0, 1, $height);
-
-			$rowBuffer = imagecreatetruecolor($width, 1);
-			for( $y=0 ; $y<($height/2) ; $y++ ) {
-				imagecopy($rowBuffer, $imgdest  , 0, 0, 0, $height-$y-1, $width, 1);
-				imagecopy($imgdest  , $imgdest  , 0, $height-$y-1, 0, $y, $width, 1);
-				imagecopy($imgdest  , $rowBuffer, 0, $y, 0, 0, $width, 1);
-			}
-
-			imagedestroy( $rowBuffer );
-		}
 		
+		$imgdest= imageistruecolor($imgsrc) ? 
+			imagecreatetruecolor($this->width, $this->height) :
+			imagecreate($this->width, $this->height);
+			
+		imagesavealpha($imgdest, true);
+		imagealphablending($imgdest, false);
+
+		// image dimensions
+		$x = imagesx($imgdest);
+		$y = imagesy($imgdest);
+		// copy over all the image data into the new image
+		imagecopy ($imgdest, $imgsrc, 0, 0, 0, 0, $x, $y);
+
+		// rows loop
+		// see: http://stackoverflow.com/questions/1890409/change-hue-of-an-image-with-php-gd-library
+		for($i=0; $i<$y; $i++)
+		{
+			// cols loop
+			for($j=0; $j<$x; $j++)
+			{
+				$rgba = imagecolorat($imgsrc, $j, $i); // position of color in the palette
+				$r = ($rgba >> 16) & 0xFF;
+				$g = ($rgba >> 8) & 0xFF;
+				$b = $rgba & 0xFF;
+				$alpha = ($rgba & 0x7F000000) >> 24;
+				
+				$col = imagecolorallocatealpha($imgdest, 255-$r, 255-$g, 255-$b, $alpha);
+				// $this->log("$rgb: " . print_r($col, true) . "\n");
+				imagesetpixel($imgdest, $j, $i, $col);
+			}
+		}
+
 		$this->image = $imgdest;
 		return $this;
 	}
@@ -134,9 +164,12 @@ class Image
 		}
 	}
 	
+	// function log($msg) {
+	// 	print("$msg\n");
+	// }
 	function log($msg) {
-		print("$msg\n");
+		$logfile = dirname(__FILE__) . "/image.log";
+		error_log($msg . "\n", 3, $logfile);
+		print($msg . "\n");
 	}
 }
-
-// from: 
