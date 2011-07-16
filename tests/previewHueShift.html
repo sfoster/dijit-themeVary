@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Page Title</title>
+	<link id="themeStyles" rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/dojo/1.6.0/dijit/themes/claro/claro.css">
+	<script src="http://ajax.googleapis.com/ajax/libs/dojo/1.6.0/dojo/dojo.xd.js" type="text/javascript" data-dojo-config="parseOnLoad: true"></script>
+	<script>
+	dojo.require("dojox.color");
+	dojo.require("dojo.colors");
+	dojo.require("dojo.string");
+	dojo.require("dijit.form.HorizontalSlider");
+
+	function labelColor(color){
+		var str = hsvToString(color.toHsv());
+		return '<span style="background-color: #000;color: #ccc;font-size: 12px">'+str+'</span>';
+	}
+	function hsvToString(hsv){
+		var newHsv = {};
+		for(var i in hsv){
+			newHsv[i] = Number(hsv[i]).toFixed(2)
+		}
+		return dojo.string.substitute(
+			"H: ${h}, S: ${s}, V: ${v}", newHsv
+		);
+	}	
+	
+	function hsvTransform(hsv, H, S, V) {
+		// hsv: hsv color
+		// H: Hue offset (degrees)
+		// S: Saturation offset (%)
+		// V: Value offset (%)
+		console.log("hsvTransform: HSV: ", dojo.toJson([H,S,V]));
+		var newHsv = {
+			h: (360 + hsv.h + H) % 360, // keep it above 0
+			s: Math.min(100, hsv.s+S),
+			v: Math.min(100, hsv.v+V)
+		};
+		return newHsv;
+	}
+
+	function toNumber(obj){
+		for(var i in obj){
+			obj[i] = Number(obj[i]);
+		}
+		return obj;
+	}
+	
+	dojo.ready(function(){
+		var initialColor = window.initialColor = {
+			r: 255, g: 0, b: 0
+		};
+
+		var dxColor = new dojox.color.Color(initialColor);
+		console.log("initial color in HSV: ", dojo.toJson(dxColor.toHsv()));
+		update({ h:0, s:0, v:0 }, true);
+		
+		dojo.style(dojo.byId("initialSwatch"), 
+			"backgroundColor", dxColor.toCss());
+		dojo.byId("initialSwatch").innerHTML = labelColor(dxColor);
+	});
+	
+	function update(offsets, updateSliders){
+		var hsvNode = dojo.byId("hsvValue"),
+			rgbNode = dojo.byId("rgbValue"),
+			initialRgbNode = dojo.byId("initialRgbValue"),
+			swatch = dojo.byId("swatch"),
+			deltaNode = dojo.byId("hsvDeltaValue");
+
+		var initial = new dojox.color.Color(initialColor);
+		var originalHsv = initial.toHsv();
+
+		var hsv = hsvTransform(
+			originalHsv, 
+			offsets.h, 	// Hue delta (degrees)
+			offsets.s, 	// Saturation delta (%)
+			offsets.v	// Value delta (%)
+		);
+		console.log("transformed: ", originalHsv, "to", hsv, " with: ", offsets);
+		var outputColor = new dojox.color.fromHsv(hsv);
+		
+		hsvNode.innerHTML = hsvToString(hsv);
+		rgbNode.innerHTML = outputColor.toCss();
+		initialRgbNode.innerHTML = initial.toCss()
+		
+		dojo.attr("swatch", "title", hsvToString(offsets))
+		
+		deltaNode.innerHTML = hsvToString(offsets);
+
+		dojo.style(
+			dojo.byId("swatch"), 
+			"backgroundColor", 
+			outputColor.toCss()
+		);
+		dojo.byId("swatch").innerHTML = labelColor(outputColor);
+
+		if(updateSliders){
+			dijit.byId("h").set("value", hsv.h); 
+			dijit.byId("s").set("value", hsv.s); 
+			dijit.byId("v").set("value", hsv.v);
+		}
+	}
+	
+	function updateHSV(){
+		var offsets = {
+			h: Number(dijit.byId("h").get("value")), 
+			s: Number(dijit.byId("s").get("value")), 
+			v: Number(dijit.byId("v").get("value"))
+		};
+		update(offsets);
+	}
+	</script>
+</head>
+<body class="claro">
+	<div id="container" style="width: 600px; margin: 0 auto">
+		<h3>HSV Values</h3>
+		<div id="h" 
+			dojoType="dijit.form.HorizontalSlider" 
+			minimum="-180" maximum="180" onChange="updateHSV()"></div>
+		<div id="s" 
+			dojoType="dijit.form.HorizontalSlider" 
+			minimum="-100" maximum="100" onChange="updateHSV()"></div>
+		<div id="v" 
+			dojoType="dijit.form.HorizontalSlider" 
+			minimum="-100" maximum="100" onChange="updateHSV()"></div>
+
+		<h2>Swatch</h2>
+		<div id="initialSwatch" style="display: inline-block; width: 30%; height: 100px;"></div>
+		<h2>Adjusted</h2>
+		<div id="swatch" 		style="display: inline-block; width: 30%; height: 100px;"></div>
+
+		<dl>
+			<dt>Initial RGB</dt>
+			<dd id="initialRgbValue"></dd>
+			<dt>HSV</dt>
+			<dd id="hsvValue"></dd>
+			<dt>RGB</dt>
+			<dd id="rgbValue"></dd>
+			<dt>Relative HSV</dt>
+			<dd id="hsvDeltaValue"></dd>
+		</dl>
+
+	</div>
+</body>
+</html>
