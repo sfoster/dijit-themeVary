@@ -30,7 +30,8 @@
 		// H: Hue offset (degrees)
 		// S: Saturation offset (%)
 		// V: Value offset (%)
-		console.log("hsvTransform: HSV: ", dojo.toJson([H,S,V]));
+
+		// console.log("hsvTransform: HSV: ", dojo.toJson([H,S,V]));
 		var newHsv = {
 			h: (360 + hsv.h + H) % 360, // keep it above 0
 			s: Math.min(100, hsv.s+S),
@@ -93,6 +94,9 @@
 			outputColor.toCss()
 		);
 		dojo.byId("swatch").innerHTML = labelColor(outputColor);
+		
+		// and the image too
+		transformImage && transformImage(offsets);
 
 		if(updateSliders){
 			dijit.byId("h").set("value", hsv.h); 
@@ -141,5 +145,59 @@
 		</dl>
 
 	</div>
+	<img src="./degas.jpg" id="imgIn" style="display:inline-block"/>
+	<canvas id="thecanvas"  style="display:inline-block"></canvas>
+	<script>
+		dojo.ready(function(){
+			var canvas = dojo.byId("thecanvas"), 
+				img = dojo.byId("imgIn");
+				dojo.attr(canvas, "width", img.width);
+				dojo.attr(canvas, "height", img.height);
+				
+		});
+		
+		var lastOffsets = null;
+		
+		function transformImage(hsvOffsets){
+			var canvas = dojo.byId("thecanvas"), 
+				context = canvas.getContext("2d"),
+				img = dojo.byId("imgIn")
+			
+			context.drawImage(img, 0, 0);
+
+			var cacheKey = dojo.toJson(hsvOffsets);
+			if(cacheKey == lastOffsets) {
+				return;
+			} else {
+				lastOffsets = cacheKey;
+			}
+			var imgRect = context.getImageData(0, 0, img.width, img.height);
+			var pixels = imgRect.data;
+			console.log(pixels.length/4 +" pixels to transform ", img.width, img.height, img.width * img.height);
+			for (var i = 0, n = pixels.length; i < n; i += 4) {
+				var rgba = {
+					r: pixels[i],
+					g: pixels[i+1],
+					b: pixels[i+2],
+					a: pixels[i+3]
+				};
+				var colorHsv = new dojox.color.Color(rgba).toHsv();
+				var newHsv = hsvTransform(
+					colorHsv, 
+					hsvOffsets.h, 	// Hue delta (degrees)
+					hsvOffsets.s, 	// Saturation delta (%)
+					hsvOffsets.v	// Value delta (%)
+				);
+				var outputColor = new dojox.color.fromHsv(newHsv);
+				
+				// put it back
+				pixels[i] = outputColor.r;
+				pixels[i+1] = outputColor.g;
+				pixels[i+2] = outputColor.b,
+				pixels[i+3] = rgba.a;
+			}
+			context.putImageData(imgRect, 0, 0);
+		}
+	</script>
 </body>
 </html>
