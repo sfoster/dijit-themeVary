@@ -93,7 +93,14 @@ class CssTransformApp
 	}
 	
 	function fetchTheme() {
-		$repo = $this->svnThemeUrl;
+		// svn url case
+		if(!empty($this->svnThemeUrl)) {
+			return $this->_fetchSvnTheme($this->svnThemeUrl);
+		}
+		// TODO: handle other cases? git/whatever..
+	}
+	
+	function _fetchSvnTheme($repo) {
 		if(!$repo) {
 			throw new Exception("Bad repo url: " . $repo);
 		}
@@ -114,6 +121,7 @@ class CssTransformApp
 			$this->log("Result: " . $result);
 		}
 		$this->log("/Fetched theme from svn");
+		return 1;
 	}
 	
 	function renameDirectory($path="", $filter, $transform) {
@@ -156,8 +164,8 @@ class CssTransformApp
 		}
 		closedir($dir_handle);
 
-		// return array
-		return $items;
+		// // return array
+		// return $items;
 	}
 
 	function transformCssFile($path) {
