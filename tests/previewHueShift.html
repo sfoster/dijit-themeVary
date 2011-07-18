@@ -34,8 +34,8 @@
 		// console.log("hsvTransform: HSV: ", dojo.toJson([H,S,V]));
 		var newHsv = {
 			h: (360 + hsv.h + H) % 360, // keep it above 0
-			s: Math.min(100, hsv.s+S),
-			v: Math.min(100, hsv.v+V)
+			s: Math.max(0, Math.min(100, hsv.s+S)),	// clamp to 0-100
+			v: Math.max(0, Math.min(100, hsv.v+V))	// clamp to 0-100
 		};
 		return newHsv;
 	}
@@ -161,7 +161,7 @@
 		function transformImage(hsvOffsets){
 			var canvas = dojo.byId("thecanvas"), 
 				context = canvas.getContext("2d"),
-				img = dojo.byId("imgIn")
+				img = dojo.byId("imgIn");
 			
 			context.drawImage(img, 0, 0);
 
