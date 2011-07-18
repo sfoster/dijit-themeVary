@@ -70,6 +70,7 @@ class Color
 				$this->sanitize();
 			}
 		}
+		// echo "after from/sanitize: " . print_r($this, true) . "\n";
 		return $this;	// dojo.Color
 	}
 	function sanitize(){
@@ -78,7 +79,8 @@ class Color
 		// description:
 		//		the default implementation does nothing, include dojo.colors to
 		//		augment it with real checks
-		return $this;	// dojo.Color
+		
+		// return $this;	// dojo.Color
 	}
 
 	function toRgb(){
@@ -179,7 +181,7 @@ class Color
 			$values = array_map('trim', explode(",", $matches[1]));
 			echo "matched rgb: " . print_r($values, true) . "\n";
 			
-			return Color::colorFromArray($values); // pass r,g,b,a as array
+			return Color::colorFromArray($values, $obj); // pass r,g,b,a as array
 		}
 		return null;
 	}
@@ -227,7 +229,8 @@ class Color
 		//		| var myColor = dojo.colorFromArray([237,237,237,0.5]); // grey, 50% alpha
 		// returns:
 		//		A dojo.Color object. If obj is passed, it will be the return value.
-		echo "handling array " . print_r($arColor, true) ." with colorFromArray. Obj: ". get_class($obj)."\n";
+		echo "colorFromArray: handling array " . print_r($arColor, true) . "\n";
+		echo "colorFromArray: obj " . print_r($obj) ."\n";
 		$t = (null==$obj) ? new Color() : $obj;
 		$r = intval($arColor[0]); 
 		$g = intval($arColor[1]); 
