@@ -48,7 +48,7 @@ class Color
 		$this->r = $r; 
 		$this->g = $g; 
 		$this->b = $b; 
-		$this->a = $a;
+		$this->a = empty($a) ? 1 : $a;
 	}
 	
 	function setColor(/*Array|String|Object*/ $color){
@@ -65,7 +65,7 @@ class Color
 		}else if("array" == gettype($color)){
 			Color::colorFromArray($color, $this);
 		}else{
-			$this->_set($color->r, $color->g, $color->b, $color->a);
+			$this->_set($color->r, $color->g, $color->b, @$color->a);
 			if( "Color" != get_class($color) ){ 
 				$this->sanitize();
 			}
@@ -104,7 +104,7 @@ class Color
 			$this->r,
 			$this->g,
 			$this->b,
-			$this->a
+			isset($this->a) ? $this->a : 1
 		);
 	}
 
@@ -276,7 +276,7 @@ class Color
 	// (select) dojox/color/_base ports
 	// 	don't need the cmyk stuff
 	
-	static function fromHsl(/* Object|Array|int */$hue, /* int */$saturation, /* int */$luminosity){
+	static function fromHsl(/* Object|Array|int */$hue, /* int */$saturation=null, /* int */$luminosity=null){
 		//	summary
 		//	Create a dojox.color.Color from an HSL defined color.
 		//	hue from 0-359 (degrees), saturation and luminosity 0-100.
@@ -322,11 +322,10 @@ class Color
 		));
 	}
 	
-	static function fromHsv(/* Object|Array|int */$hue, /* int */$saturation, /* int */$value){
+	static function fromHsv(/* Object|Array|int */$hue, /* int */$saturation=null, /* int */$value=null){
 		//	summary
 		//	Create a dojox.color.Color from an HSV defined color.
 		//	hue from 0-359 (degrees), saturation and value 0-100.
-
 		if(is_array($hue)){
 			$saturation=$hue[1];
 			$value=$hue[2];

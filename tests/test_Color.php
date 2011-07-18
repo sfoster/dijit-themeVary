@@ -29,6 +29,19 @@ class ColorTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals( 51, $color->g );  
 		$this->assertEquals( 255, $color->b );  
 	}  
+
+	public function testFromObject()  
+	{  
+		// test to ensure an array of [r,b,b] values is correctly handled
+		$rgb = (Object)array("r"=>0, "g"=>51, "b"=>255);
+		$color = new Color($rgb);
+		print("testFromArray test\n");
+		
+		$this->assertTrue( $color && "Color" == get_class($color));  
+		$this->assertEquals( 0, $color->r );  
+		$this->assertEquals( 51, $color->g );  
+		$this->assertEquals( 255, $color->b );  
+	}  
 	
 	public function testFromRgb()  
 	{  
@@ -119,15 +132,65 @@ class ColorTest extends PHPUnit_Framework_TestCase
 	public function testFromHsv()  
 	{  
 		print("testFromHsv test\n");
-		$testImplemented = false;
-		$this->assertTrue( $testImplemented );  
+		$grey = 	new Color( (Object)array("r"=>128, 	"g"=>128,	"b"=>128) );
+		$red = 		new Color( (Object)array("r"=>255, 	"g"=>0,		"b"=>0) );
+		$green = 	new Color( (Object)array("r"=>0, 	"g"=>255,	"b"=>0) );
+		$blue = 	new Color( (Object)array("r"=>0,	"g"=>0,		"b"=>255) );
+		$yellow = 	new Color( (Object)array( "r"=>255, "g"=>255, "b"=>0) );
+
+		//	fromHsv
+		$this->assertEquals(
+			$grey,
+			Color::fromHsv( (Object)array("h"=>0, "s"=>0, "v"=>50) )
+		);
+		$this->assertEquals(
+			$red,
+			Color::fromHsv( (Object)array( "h"=>0, "s"=>100, "v" =>100) )
+		);
+		$this->assertEquals(
+			$green,
+			Color::fromHsv( (Object)array("h" =>120, "s"=>100, "v" =>100))
+		);
+		$this->assertEquals(
+			$blue,
+			Color::fromHsv( (Object)array("h" =>240, "s"=>100, "v" =>100))
+		);
+		$this->assertEquals(
+			$yellow,
+			Color::fromHsv( (Object)array( "h" =>60, "s"=>100, "v" =>100) )
+		);
 	}  
 
 	public function testFromHsl()  
 	{  
 		print("testFromHsl test\n");
-		$testImplemented = false;
-		$this->assertTrue( $testImplemented );  
+		$grey = 	new Color( (Object)array("r"=>128, 	"g"=>128,	"b"=>128) );
+		$red = 		new Color( (Object)array("r"=>255, 	"g"=>0,		"b"=>0) );
+		$green = 	new Color( (Object)array("r"=>0, 	"g"=>255,	"b"=>0) );
+		$blue = 	new Color( (Object)array("r"=>0,	"g"=>0,		"b"=>255) );
+		$yellow = 	new Color( (Object)array( "r"=>255, "g"=>255, "b"=>0) );
+
+		$this->assertEquals(
+			$grey,
+			Color::fromHsl((Object)array("h"=>0, "s"=>0, "l"=>50))
+		);
+		$this->assertEquals(
+			$red,
+			Color::fromHsl( (Object)array("h"=>0, "s"=>100, "l"=>50) ) 
+		);
+		$this->assertEquals(
+			$green,
+			Color::fromHsl( (Object)array("h"=>120, "s"=>100, "l"=>50) ) 
+		);
+		$this->assertEquals(
+			$blue,
+			Color::fromHsl((Object)array("h"=>240, "s"=>100, "l"=>50))
+		);
+		$this->assertEquals(
+			$yellow,
+			Color::fromHsl( (Object)array("h"=>60, "s"=>100, "l"=>50) )
+		);
+
 	}  
 
 }
