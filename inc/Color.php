@@ -172,14 +172,14 @@ class Color
 		//		creating a new object.
 		// returns:
 		//		A dojo.Color object. If obj is passed, it will be the return value.
-		echo "handling str: $color with colorFromRgb\n";
+		// echo "handling str: $color with colorFromRgb\n";
 		$color = strtolower($color); 
 		$matches = array();
 		if(
 			preg_match('/^rgba?\(([\s\.,0-9]+)\)/', $color, $matches)
 		) {
 			$values = array_map('trim', explode(",", $matches[1]));
-			echo "matched rgb: " . print_r($values, true) . "\n";
+			// echo "matched rgb: " . print_r($values, true) . "\n";
 			
 			return Color::colorFromArray($values, $obj); // pass r,g,b,a as array
 		}
@@ -200,17 +200,17 @@ class Color
 		//
 		// example:
 		//	| var thing = dojo.colorFromHex("#000"); // black, shorthand
-		echo "handling str $color with colorFromHex\n";
+		// echo "handling str $color with colorFromHex\n";
 		$t = (null==$obj) ? new Color() : $obj;
 		$bits = (strlen($color) == 4) ? 4 : 8;
 		$mask = (1 << $bits) - 1;
 		$color = hexdec(substr($color, 1));
-		echo "hexdec gives us: $color\n";
+		// echo "hexdec gives us: $color\n";
 
 		foreach(array("b", "g", "r") as $x){
 			$c = $color & $mask;
 			$color >>= $bits;
-			echo "shifted $color\n";
+			// echo "shifted $color\n";
 			if($bits == 4) {
 				$t->$x = 17 * $c;
 			} else {
@@ -229,14 +229,14 @@ class Color
 		//		| var myColor = dojo.colorFromArray([237,237,237,0.5]); // grey, 50% alpha
 		// returns:
 		//		A dojo.Color object. If obj is passed, it will be the return value.
-		echo "colorFromArray: handling array " . print_r($arColor, true) . "\n";
-		echo "colorFromArray: obj " . print_r($obj) ."\n";
+		//echo "colorFromArray: handling array " . print_r($arColor, true) . "\n";
+		//echo "colorFromArray: obj " . print_r($obj) ."\n";
 		$t = (null==$obj) ? new Color() : $obj;
 		$r = intval($arColor[0]); 
 		$g = intval($arColor[1]); 
 		$b = intval($arColor[2]); 
 		$a = isset($arColor[3]) ? intval($arColor[3]) : 1;
-		echo "calling _set with $r, $g, $b, $a\n";
+		// echo "calling _set with $r, $g, $b, $a\n";
 		$t->_set($r, $g, $b, $a);
 
 		$t->sanitize();	// dojo.Color
@@ -272,4 +272,102 @@ class Color
 		}
 		return null;
 	}
+
+	// (select) dojox/color/_base ports
+	// 	don't need the cmyk stuff
+	
+	static function fromHsl(/* Object|Array|int */$hue, /* int */$saturation, /* int */$luminosity){
+		//	summary
+		//	Create a dojox.color.Color from an HSL defined color.
+		//	hue from 0-359 (degrees), saturation and luminosity 0-100.
+
+		if(is_array($hue)){
+			$saturation=$hue[1];
+			$luminosity=$hue[2];
+			$hue=$hue[0];
+		} else if(is_object($hue)){
+			$saturation=$hue->s;
+			$luminosity=$hue->l;
+			$hue=$hue->h;
+		}
+		$saturation = $saturation/100;
+		$luminosity = $luminosity/100;
+
+		while($hue<0){ $hue+=360; }
+		while($hue>=360){ $hue-=360; }
+		
+		$r; $g; $b;
+		if($hue<120){
+			$r=(120-$hue)/60; $g=$hue/60; $b=0;
+		} else if($hue<240){
+			$r=0; $g=(240-$hue)/60; $b=($hue-120)/60;
+		} else {
+			$r=($hue-240)/60; $g=0; $b=(360-$hue)/60;
+		}
+		
+		$r=2*$saturation*min($r, 1)+(1-$saturation);
+		$g=2*$saturation*min($g, 1)+(1-$saturation);
+		$b=2*$saturation*min($b, 1)+(1-$saturation);
+		if($luminosity<0.5){
+			$r*=$luminosity; $g*=$luminosity; $b*=$luminosity;
+		}else{
+			$r=(1-$luminosity)*$r+2*$luminosity-1;
+			$g=(1-$luminosity)*$g+2*$luminosity-1;
+			$b=(1-$luminosity)*$b+2*$luminosity-1;
+		}
+		return new Color(array(
+			round($r*255), 		// r
+			round($g*255),		// g
+			round($b*255)		// b
+		));
+	}
+	
+	static function fromHsv(/* Object|Array|int */$hue, /* int */$saturation, /* int */$value){
+		//	summary
+		//	Create a dojox.color.Color from an HSV defined color.
+		//	hue from 0-359 (degrees), saturation and value 0-100.
+
+		if(is_array($hue)){
+			$saturation=$hue[1];
+			$value=$hue[2];
+			$hue=$hue[0];
+		} else if (is_object($hue)){
+			$saturation=$hue->s;
+			$value=$hue->v;
+			$hue=$hue->h;
+		}
+		
+		if($hue==360){ $hue=0; }
+		$saturation = $saturation/100;
+		$value = $value/100;
+		
+		$r; $g; $b;
+		if($saturation==0){
+			$r=$value;
+			$b=$value;
+			$g=$value;
+		}else{
+			$hTemp=$hue/60;
+			$i=floor($hTemp);
+			$f=$hTemp-$i;
+			$p=$value*(1-$saturation);
+			$q=$value*(1-($saturation*$f));
+			$t=$value*(1-($saturation*(1-$f)));
+			switch($i){
+				case 0:{ $r=$value; $g=$t; $b=$p; break; }
+				case 1:{ $r=$q; $g=$value; $b=$p; break; }
+				case 2:{ $r=$p; $g=$value; $b=$t; break; }
+				case 3:{ $r=$p; $g=$q; $b=$value; break; }
+				case 4:{ $r=$t; $g=$p; $b=$value; break; }
+				case 5:{ $r=$value; $g=$p; $b=$q; break; }
+			}
+		}
+		return new Color(array(
+			round($r*255), 		// r
+			round($g*255), 		// g
+			round($b*255)		// b
+		));
+	}
+
+	
 }
