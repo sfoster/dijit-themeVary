@@ -80,7 +80,7 @@ class Color
 		//		the default implementation does nothing, include dojo.colors to
 		//		augment it with real checks
 		
-		// return $this;	// dojo.Color
+		return $this;	// dojo.Color
 	}
 
 	function toRgb(){
@@ -139,7 +139,7 @@ class Color
 	function toString(){
 		// summary:
 		//		Returns a visual representation of the color
-		return $this.toCss(true); // String
+		return $this->toCss(true); // String
 	}
 
 	static function blendColors(
@@ -368,5 +368,70 @@ class Color
 		));
 	}
 
+	function toHsl(){
+		//	summary
+		//	Convert this Color to an HSL definition.
+		$r=$this->r/255;
+		$g=$this->g/255;
+		$b=$this->b/255;
+		$min = min($r, $b, $g);
+		$max = max($r, $g, $b);
+		$delta = $max-$min;
+		$h=0; $s=0; $l=($min+$max)/2;
+		if($l>0 && $l<1){
+			$s = $delta/(($l<0.5)?(2*$l):(2-2*$l));
+		}
+		if($delta>0){
+			if($max==$r && $max!=$g){
+				$h+=($g-$b)/$delta;
+			}
+			if($max==$g && $max!=$b){
+				$h+=(2+($b-$r)/$delta);
+			}
+			if($max==$b && $max!=$r){
+				$h+=(4+($r-$g)/$delta);
+			}
+			$h*=60;
+		}
+		$hsl = (Object)array( 
+			"h" => $h, 
+			"s" => round($s*100), 
+			"l" => round($l*100)
+		);	
+		return $hsl; //	Object
+	}
+
+	function toHsv(){
+		//	summary
+		//	Convert this Color to an HSV definition.
+		$r=$this->r / 255;
+		$g=$this->g / 255;
+		$b=$this->b / 255;
+		
+		$min = min($r, $b, $g);
+		$max = max($r, $g, $b);
+		$delta = $max-$min;
+		$h = null;
+		$s = ($max==0)?0:($delta/$max);
+		if($s==0){
+			$h = 0;
+		}else{
+			if($r==$max){
+				$h = 60*($g-$b)/$delta;
+			}else if($g==$max){
+				$h = 120 + 60*($b-$r)/$delta;
+			}else{
+				$h = 240 + 60*($r-$g)/$delta;
+			}
+
+			if($h<0){ $h+=360; }
+		}
+		$hsv = (Object)array( 
+			"h"=> $h, 
+			"s"=> round($s*100), 
+			"v"=> round($max*100)
+		);	
+		return $hsv; //	Object
+	}
 	
 }

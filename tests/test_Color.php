@@ -192,5 +192,43 @@ class ColorTest extends PHPUnit_Framework_TestCase
 		);
 
 	}  
+	public function testColorExtensions(){
+
+		$grey=new Color((Object)array( "r"=>128, "g"=>128, "b"=>128 ));
+		$red=new Color((Object)array( "r"=>255, "g"=>0, "b"=>0 ));
+		$green=new Color((Object)array( "r"=>0, "g"=>255, "b"=>0 ));
+		$blue=new Color((Object)array( "r"=>0, "g"=>0, "b"=>255 ));
+		$yellow=new Color((Object)array( "r"=>255, "g"=>255, "b"=>0 ));
+
+		// //	toCmy
+		// $this->assertEquals($grey->toCmy(), (Object)array( "c"=>50, "m"=>50, "y"=>50 ));
+		// $this->assertEquals($red->toCmy(), (Object)array( "c"=>0, "m"=>100, "y"=>100 ));
+		// $this->assertEquals($green->toCmy(), (Object)array( "c"=>100, "m"=>0, "y"=>100 ));
+		// $this->assertEquals($blue->toCmy(), (Object)array( "c"=>100, "m"=>100, "y"=>0 ));
+		// $this->assertEquals($yellow->toCmy(), (Object)array( "c"=>0, "m"=>0, "y"=>100 ));
+		// 
+		// //	toCmyk
+		// $this->assertEquals($grey->toCmyk(), (Object)array( "c"=>0, "m"=>0, "y"=>0, "b"=>50 ));
+		// $this->assertEquals($red->toCmyk(), (Object)array( "c"=>0, "m"=>100, "y"=>100, "b"=>0 ));
+		// $this->assertEquals($green->toCmyk(), (Object)array( "c"=>100, "m"=>0, "y"=>100, "b"=>0 ));
+		// $this->assertEquals($blue->toCmyk(), (Object)array( "c"=>100, "m"=>100, "y"=>0, "b"=>0 ));
+		// $this->assertEquals($yellow->toCmyk(), (Object)array( "c"=>0, "m"=>0, "y"=>100, "b"=>0 ));
+
+		//	toHsl
+		$this->assertTrue(method_exists($grey, "toHsl"));
+		$this->assertEquals($grey->toHsl(), (Object)array( "h"=>0, "s"=>0, "l"=>50 ));
+		$this->assertEquals($red->toHsl(), (Object)array( "h"=>0, "s"=>100, "l"=>50 ));
+		$this->assertEquals($green->toHsl(), (Object)array( "h"=>120, "s"=>100, "l"=>50 ));
+		$this->assertEquals($blue->toHsl(), (Object)array( "h"=>240, "s"=>100, "l"=>50 ));
+		$this->assertEquals($yellow->toHsl(), (Object)array( "h"=>60, "s"=>100, "l"=>50 ));
+
+		//	toHsv
+		$this->assertTrue(method_exists($grey, "toHsv"));
+		$this->assertEquals($grey->toHsv(), (Object)array( "h"=>0, "s"=>0, "v"=>50 ));
+		$this->assertEquals($red->toHsv(), (Object)array( "h"=>0, "s"=>100, "v"=>100 ));
+		$this->assertEquals($green->toHsv(), (Object)array( "h"=>120, "s"=>100, "v"=>100 ));
+		$this->assertEquals($blue->toHsv(), (Object)array( "h"=>240, "s"=>100, "v"=>100 ));
+		$this->assertEquals($yellow->toHsv(), (Object)array( "h"=>60, "s"=>100, "v"=>100 ));
+	}
 
 }
